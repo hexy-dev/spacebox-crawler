@@ -6,7 +6,7 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 )
 
-func (c *Client) GetTxResults(ctx context.Context, height int64) ([]*abci.ResponseDeliverTx, error) {
+func (c *Client) GetTxResults(ctx context.Context, height int64) ([]*abci.ExecTxResult, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
 	defer cancel()
 

@@ -16,8 +16,8 @@ func (c *Client) GetBlockEvents(ctx context.Context, height int64) (begin, end t
 		return nil, nil, err
 	}
 
-	begin = types.NewBlockerEventsAttributes(result.BeginBlockEvents)
-	end = types.NewBlockerEventsAttributes(result.EndBlockEvents)
+	begin = types.NewBlockerEventsAttributes(result.FinalizeBlockEvents)
+	end = types.NewBlockerEventsAttributes(result.FinalizeBlockEvents)
 
 	return
 }

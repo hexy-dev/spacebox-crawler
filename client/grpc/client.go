@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/timeout"
@@ -24,7 +24,7 @@ type (
 	}
 
 	Client struct {
-		TmsService tmservice.ServiceClient
+		TmsService cmtservice.ServiceClient
 		TxService  tx.ServiceClient
 
 		conn    *grpc.ClientConn
@@ -80,7 +80,7 @@ func (c *Client) Start(ctx context.Context) error {
 		return err
 	}
 
-	c.TmsService = tmservice.NewServiceClient(grpcConn)
+	c.TmsService = cmtservice.NewServiceClient(grpcConn)
 	c.TxService = tx.NewServiceClient(grpcConn)
 
 	c.conn = grpcConn

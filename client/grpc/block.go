@@ -5,13 +5,13 @@ import (
 
 	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
 	cometbfttypes "github.com/cometbft/cometbft/types"
-	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 )
 
 func (c *Client) Block(ctx context.Context, height int64) (*cometbftcoretypes.ResultBlock, error) {
 	resp, err := c.TmsService.GetBlockByHeight(
 		ctx,
-		&tmservice.GetBlockByHeightRequest{
+		&cmtservice.GetBlockByHeightRequest{
 			Height: height,
 		},
 	)

@@ -6,7 +6,7 @@ import (
 	"github.com/cometbft/cometbft/crypto/ed25519"
 	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
 	cometbfttypes "github.com/cometbft/cometbft/types"
-	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	"github.com/cosmos/cosmos-sdk/types/query"
 )
 
@@ -22,7 +22,7 @@ func (c *Client) Validators(ctx context.Context, height int64) (*cometbftcoretyp
 	var offset uint64
 
 	for {
-		respPb, err := c.TmsService.GetValidatorSetByHeight(ctx, &tmservice.GetValidatorSetByHeightRequest{
+		respPb, err := c.TmsService.GetValidatorSetByHeight(ctx, &cmtservice.GetValidatorSetByHeightRequest{
 			Height: height,
 			Pagination: &query.PageRequest{
 				Offset:     offset,
@@ -56,7 +56,7 @@ func (c *Client) Validators(ctx context.Context, height int64) (*cometbftcoretyp
 	return vals, nil
 }
 
-func convertValidator(c *tmservice.Validator) *cometbfttypes.Validator {
+func convertValidator(c *cmtservice.Validator) *cometbfttypes.Validator {
 	pk := ed25519.PubKey(c.PubKey.Value)
 
 	return &cometbfttypes.Validator{
