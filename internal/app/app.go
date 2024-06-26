@@ -26,11 +26,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/ibc-go/modules/capability"
@@ -236,13 +234,7 @@ func MakeEncodingConfig() codec.Codec {
 			ibcaccounts.AppModuleBasic{},
 			ibclightclient.AppModuleBasic{},
 			interchainprovider.AppModuleBasic{},
-			gov.NewAppModuleBasic(
-				[]govclient.ProposalHandler{
-					paramsclient.ProposalHandler,
-					//upgradeclient.LegacyProposalHandler,
-					//upgradeclient.LegacyCancelProposalHandler,
-				},
-			),
+			gov.AppModuleBasic{},
 		)
 	)
 
