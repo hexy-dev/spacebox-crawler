@@ -1,11 +1,11 @@
 module github.com/bro-n-bro/spacebox-crawler/v2
 
-go 1.22.4
+go 1.23
 
 replace (
-	github.com/CosmWasm/wasmd => github.com/neutron-org/wasmd v0.51.0
+	github.com/CosmWasm/wasmd => github.com/neutron-org/wasmd v0.51.1
 	github.com/cosmos/admin-module/v2 => github.com/neutron-org/admin-module/v2 v2.0.0
-	github.com/cosmos/cosmos-sdk => github.com/neutron-org/cosmos-sdk v0.50.7-neutron
+	github.com/cosmos/cosmos-sdk => github.com/neutron-org/cosmos-sdk v0.50.8-neutron
 	github.com/cosmos/iavl => github.com/cosmos/iavl v1.2.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
@@ -18,7 +18,7 @@ require (
 	cosmossdk.io/x/upgrade v0.1.3
 	github.com/CosmWasm/wasmd v0.51.0
 	github.com/caarlos0/env/v6 v6.10.1
-	github.com/cometbft/cometbft v0.38.7
+	github.com/cometbft/cometbft v0.38.10
 	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/cosmos/admin-module/v2 v2.0.0-20240430142959-8b3328d1b1a2
 	github.com/cosmos/cosmos-sdk v0.50.7
@@ -31,7 +31,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12
-	github.com/neutron-org/neutron/v4 v4.0.1
+	github.com/neutron-org/neutron/v4 v4.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
 	github.com/rs/zerolog v1.32.0
@@ -61,7 +61,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
-	github.com/CosmWasm/wasmvm/v2 v2.0.0 // indirect
+	github.com/CosmWasm/wasmvm/v2 v2.0.2 // indirect
 	github.com/DataDog/datadog-go v3.2.0+incompatible // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/aws/aws-sdk-go v1.44.224 // indirect
@@ -142,6 +142,7 @@ require (
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
@@ -155,7 +156,6 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
-	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/linxGnu/grocksdb v1.8.14 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
