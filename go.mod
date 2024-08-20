@@ -27,8 +27,8 @@ require (
 	github.com/cosmos/ibc-go/v8 v8.2.1
 	github.com/cosmos/interchain-security/v5 v5.0.0
 	github.com/globocom/mongo-go-prometheus v0.1.1
-	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.0
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
+	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.0.1
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/neutron-org/neutron/v4 v4.2.0
@@ -39,7 +39,7 @@ require (
 	go.mongodb.org/mongo-driver v1.12.1
 	golang.org/x/crypto v0.24.0
 	golang.org/x/sync v0.7.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.65.0
 )
 
 require (

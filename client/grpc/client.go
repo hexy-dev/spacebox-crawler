@@ -40,6 +40,7 @@ func New(cfg Config, l zerolog.Logger, st storage) *Client {
 	return &Client{cfg: cfg, log: &l, storage: st}
 }
 
+//nolint:staticcheck
 func (c *Client) Start(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second) // dial timeout
 	defer cancel()

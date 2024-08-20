@@ -258,7 +258,7 @@ func MakeEncodingConfig() codec.Codec {
 	std.RegisterInterfaces(registry)
 	ibctransfertypes.RegisterInterfaces(registry)
 	cryptocodec.RegisterInterfaces(registry)
-	//liquiditytypes.RegisterInterfaces(registry)
+	// liquiditytypes.RegisterInterfaces(registry)
 
 	return codec.NewProtoCodec(registry)
 }
