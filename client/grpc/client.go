@@ -7,13 +7,10 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/types/tx"
-	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/timeout"
-	"github.com/prometheus/client_golang/prometheus"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/adapter/storage/model"
 )
@@ -46,20 +43,15 @@ func (c *Client) Start(ctx context.Context) error {
 
 	options := []grpc.DialOption{
 		grpc.WithBlock(),
-		grpc.WithChainUnaryInterceptor(timeout.UnaryClientInterceptor(c.cfg.Timeout)), // request timeout
+		grpc.WithChainUnaryInterceptor(timeoutUnaryClientInterceptor(c.cfg.Timeout)), // request timeout
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(c.cfg.MaxReceiveMessageSize)),
 	}
 
 	if c.cfg.MetricsEnabled {
-		cm := grpcprom.NewClientMetrics(
-			grpcprom.WithClientHandlingTimeHistogram())
-
-		prometheus.MustRegister(cm)
-
 		options = append(
 			options,
-			grpc.WithChainUnaryInterceptor(cm.UnaryClientInterceptor()),
-			grpc.WithChainStreamInterceptor(cm.StreamClientInterceptor()),
+			grpc.WithChainUnaryInterceptor(grpcprometheus.UnaryClientInterceptor),
+			grpc.WithChainStreamInterceptor(grpcprometheus.StreamClientInterceptor),
 		)
 	}
 
@@ -67,7 +59,7 @@ func (c *Client) Start(ctx context.Context) error {
 	if c.cfg.SecureConnection {
 		options = append(options, grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{}))) // nolint:gosec
 	} else {
-		options = append(options, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		options = append(options, grpc.WithInsecure())
 	}
 
 	// Create a connection to the gRPC server.
@@ -91,3 +83,14 @@ func (c *Client) Start(ctx context.Context) error {
 func (c *Client) Stop(_ context.Context) error { return c.conn.Close() }
 
 func (c *Client) Conn() *grpc.ClientConn { return c.conn }
+
+// timeoutUnaryClientInterceptor returns a new unary client interceptor that sets a timeout on the request context.
+func timeoutUnaryClientInterceptor(timeout time.Duration) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker,
+		opts ...grpc.CallOption) error {
+
+		timedCtx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		return invoker(timedCtx, method, req, reply, cc, opts...)
+	}
+}

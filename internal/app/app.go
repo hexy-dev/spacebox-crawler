@@ -16,35 +16,30 @@ import (
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/capability"
-	"github.com/cosmos/cosmos-sdk/x/consensus"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	"github.com/cosmos/cosmos-sdk/x/mint"
-	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
-	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	gaia "github.com/cosmos/gaia/v17/x/metaprotocols"
-	ibcaccounts "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
-	ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibccore "github.com/cosmos/ibc-go/v7/modules/core"
-	ibclightclient "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
-	interchainprovider "github.com/cosmos/interchain-security/v4/x/ccv/provider"
+	ibctransfer "github.com/cosmos/ibc-go/v3/modules/apps/transfer"
+	ibccore "github.com/cosmos/ibc-go/v3/modules/core"
+	ibclightclient "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog"
+	seidex "github.com/sei-protocol/sei-chain/x/dex/types"
+	seiepoch "github.com/sei-protocol/sei-chain/x/epoch/types"
+	seievm "github.com/sei-protocol/sei-chain/x/evm/types"
+	seimint "github.com/sei-protocol/sei-chain/x/mint/types"
+	seioracle "github.com/sei-protocol/sei-chain/x/oracle/types"
+	seitokenfactory "github.com/sei-protocol/sei-chain/x/tokenfactory/types"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/adapter/storage"
 	"github.com/bro-n-bro/spacebox-crawler/v2/adapter/storage/model"
@@ -58,7 +53,6 @@ import (
 	healthchecker "github.com/bro-n-bro/spacebox-crawler/v2/pkg/health_checker"
 	ts "github.com/bro-n-bro/spacebox-crawler/v2/pkg/mapper/to_storage"
 	"github.com/bro-n-bro/spacebox-crawler/v2/pkg/worker"
-	liquiditytypes "github.com/bro-n-bro/spacebox-crawler/v2/types/liquidity"
 )
 
 const (
@@ -206,7 +200,7 @@ func MakeEncodingConfig() codec.Codec {
 		registry     = cdc.NewInterfaceRegistry()
 		basicManager = module.NewBasicManager(
 			auth.AppModuleBasic{},
-			genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			genutil.AppModuleBasic{},
 			bank.AppModuleBasic{},
 			capability.AppModuleBasic{},
 			staking.AppModuleBasic{},
@@ -219,23 +213,10 @@ func MakeEncodingConfig() codec.Codec {
 			upgrade.AppModuleBasic{},
 			evidence.AppModuleBasic{},
 			authzmodule.AppModuleBasic{},
-			groupmodule.AppModuleBasic{},
 			vesting.AppModuleBasic{},
-			nftmodule.AppModuleBasic{},
-			consensus.AppModuleBasic{},
 			ibccore.AppModuleBasic{},
-			ibcfee.AppModuleBasic{},
-			ibcaccounts.AppModuleBasic{},
-			ibclightclient.AppModuleBasic{},
-			interchainprovider.AppModuleBasic{},
-			gaia.AppModuleBasic{},
-			gov.NewAppModuleBasic(
-				[]govclient.ProposalHandler{
-					paramsclient.ProposalHandler,
-					upgradeclient.LegacyProposalHandler,
-					upgradeclient.LegacyCancelProposalHandler,
-				},
-			),
+			ibctransfer.AppModuleBasic{},
+			gov.NewAppModuleBasic(),
 		)
 	)
 
@@ -244,9 +225,14 @@ func MakeEncodingConfig() codec.Codec {
 	//
 	basicManager.RegisterInterfaces(registry)
 	std.RegisterInterfaces(registry)
-	ibctransfertypes.RegisterInterfaces(registry)
 	cryptocodec.RegisterInterfaces(registry)
-	liquiditytypes.RegisterInterfaces(registry)
+	ibclightclient.RegisterInterfaces(registry)
+	seidex.RegisterInterfaces(registry)
+	seiepoch.RegisterInterfaces(registry)
+	seievm.RegisterInterfaces(registry)
+	seimint.RegisterInterfaces(registry)
+	seioracle.RegisterInterfaces(registry)
+	seitokenfactory.RegisterInterfaces(registry)
 
 	return codec.NewProtoCodec(registry)
 }

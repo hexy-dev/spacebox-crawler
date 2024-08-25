@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	cometbftcoreypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	tmcoreypes "github.com/tendermint/tendermint/rpc/coretypes"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (w *Worker) enqueueHeight(ctx context.Context, wg *sync.WaitGroup, startHeight, stopHeight int64) {
@@ -33,7 +33,7 @@ func (w *Worker) enqueueHeight(ctx context.Context, wg *sync.WaitGroup, startHei
 	}
 }
 
-func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan cometbftcoreypes.ResultEvent) {
+func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan tmcoreypes.ResultEvent) {
 	ctx, w.stopWsListener = context.WithCancel(ctx)
 	defer w.stopWsListener()
 	w.log.Info().Msg("listening for new block events")
@@ -44,9 +44,12 @@ func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan cometbftco
 			w.log.Info().Msg("stop new block listener")
 			return
 		case e := <-eventCh:
-			newBlock, ok := e.Data.(cometbfttypes.EventDataNewBlock)
+			newBlock, ok := e.Data.(tmtypes.LegacyEventDataNewBlock)
 			if !ok {
-				w.log.Warn().Msg("failed to cast ws event to EventDataNewBlock type")
+				w.log.Warn().
+					Type("type", e.Data).
+					Msg("failed to cast ws event to LegacyEventDataNewBlock type")
+
 				continue
 			}
 

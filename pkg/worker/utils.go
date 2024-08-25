@@ -2,10 +2,7 @@ package worker
 
 import (
 	"context"
-	"strings"
 
-	codec "github.com/cosmos/cosmos-sdk/codec/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/adapter/storage/model"
@@ -55,29 +52,4 @@ func (w *Worker) checkOrCreateBlockInStorage(ctx context.Context, height int64) 
 		return w.storage.UpdateStatus(ctx, height, model.StatusProcessing)
 	}
 	return nil
-}
-
-func (w *Worker) unpackMessage(ctx context.Context, height int64, msg *codec.Any) (stdMsg sdk.Msg, err error) {
-	if err = w.cdc.UnpackAny(msg, &stdMsg); err == nil {
-		return stdMsg, nil
-	}
-
-	if strings.HasPrefix(err.Error(), "no concrete type registered for type URL") {
-		w.log.Warn().Err(err).Int64(keyHeight, height).Msg("error while unpacking message")
-
-		if err = w.storage.InsertErrorMessage(ctx, w.tsM.NewErrorMessage(height, err.Error())); err != nil {
-			w.log.Error().
-				Err(err).
-				Int64(keyHeight, height).
-				Msg("fail to insert error_message")
-			return nil, err
-		}
-
-		// just skip unsupported message
-		return nil, nil
-	}
-
-	w.log.Error().Err(err).Msg("error while unpacking message")
-
-	return nil, err
 }

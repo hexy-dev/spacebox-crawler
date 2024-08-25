@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/cometbft/cometbft/libs/json"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	"github.com/tendermint/tendermint/libs/json"
+	tmtypes "github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 )
 
-func (c *Client) Genesis(ctx context.Context) (*cometbfttypes.GenesisDoc, error) {
+func (c *Client) Genesis(ctx context.Context) (*tmtypes.GenesisDoc, error) {
 	chunk, err := c.RPCClient.GenesisChunked(ctx, 0)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (c *Client) Genesis(ctx context.Context) (*cometbfttypes.GenesisDoc, error)
 		totalData = append(totalData, ch...)
 	}
 
-	var resp *cometbfttypes.GenesisDoc
+	var resp *tmtypes.GenesisDoc
 	if err = json.Unmarshal(totalData, &resp); err != nil {
 		return nil, err
 	}

@@ -1,20 +1,17 @@
 package types
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"time"
 
-	cometbftcrypto "github.com/cometbft/cometbft/crypto"
-	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/ripemd160" // nolint: staticcheck
+	tmcoretypes "github.com/tendermint/tendermint/rpc/coretypes"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 var (
@@ -35,13 +32,13 @@ type (
 	}
 
 	Block struct {
-		rb *cometbftcoretypes.ResultBlock
+		rb *tmcoretypes.ResultBlock
 
 		Timestamp           time.Time
 		Hash                string
 		ProposerAddress     string
 		ValidatorPreCommits []ValidatorPreCommit
-		Evidence            cometbfttypes.EvidenceData
+		Evidence            tmtypes.EvidenceList
 		TxNum               int
 		TotalGas            uint64
 		Height              int64
@@ -66,7 +63,7 @@ type (
 )
 
 func NewBlock(height int64, hash, proposerAddress string, txNum int, totalGas uint64, timestamp time.Time,
-	evidence cometbfttypes.EvidenceData) *Block {
+	evidence tmtypes.EvidenceList) *Block {
 
 	return &Block{
 		Height:          height,
@@ -80,7 +77,7 @@ func NewBlock(height int64, hash, proposerAddress string, txNum int, totalGas ui
 }
 
 // NewBlockFromTmBlock builds a new Block instance from a given ResultBlock object
-func NewBlockFromTmBlock(blk *cometbftcoretypes.ResultBlock, totalGas uint64) *Block {
+func NewBlockFromTmBlock(blk *tmcoretypes.ResultBlock, totalGas uint64) *Block {
 	res := NewBlock(
 		blk.Block.Height,
 		blk.Block.Hash().String(),
@@ -100,7 +97,7 @@ func NewBlockFromTmBlock(blk *cometbftcoretypes.ResultBlock, totalGas uint64) *B
 	return res
 }
 
-func NewValidatorPreCommitsFromTmSignatures(sigs []cometbfttypes.CommitSig) []ValidatorPreCommit {
+func NewValidatorPreCommitsFromTmSignatures(sigs []tmtypes.CommitSig) []ValidatorPreCommit {
 	res := make([]ValidatorPreCommit, 0, len(sigs))
 	for _, sig := range sigs {
 		if len(sig.Signature) == 0 {
@@ -140,43 +137,9 @@ func NewTxsFromTmTxs(txs []*sdktx.GetTxResponse, cdc codec.Codec) Txs {
 	return res
 }
 
-func NewValidatorsFromTmValidator(tmVals *cometbftcoretypes.ResultValidators) Validators {
-	res := make(Validators, 0, len(tmVals.Validators))
-	for _, val := range tmVals.Validators {
-		consAddr := sdk.ConsAddress(val.Address).String()
-		if consPubKey, err := ConvertValidatorPubKeyToBech32String(val.PubKey); err == nil {
-			// we need only valid validators
-			res = append(res, NewValidator(consAddr, consPubKey))
-		}
-	}
-
-	return res
-}
-
-// NewValidator allows to build a new Validator instance
-func NewValidator(consAddr string, consPubKey string) *Validator {
-	return &Validator{
-		ConsAddr:   consAddr,
-		ConsPubkey: consPubKey,
-	}
-}
-
 func ConvertAddressToBech32String(address cryptotypes.Address) (string, error) {
 	bech32Prefix := sdk.GetConfig().GetBech32AccountAddrPrefix()
 	return bech32.ConvertAndEncode(bech32Prefix, address)
-}
-
-// ConvertValidatorPubKeyToBech32String converts the given pubKey to Bech32 string
-func ConvertValidatorPubKeyToBech32String(pubKey cometbftcrypto.PubKey) (string, error) {
-	bech32Prefix := sdk.GetConfig().GetBech32ConsensusPubPrefix()
-	return bech32.ConvertAndEncode(bech32Prefix, pubKey.Bytes())
-}
-
-func BytesToAddress(key []byte) cryptotypes.Address {
-	sha := sha256.Sum256(key)
-	hasherRIPEMD160 := ripemd160.New()
-	hasherRIPEMD160.Write(sha[:])
-	return hasherRIPEMD160.Sum(nil)
 }
 
 // TotalGas calculates and returns total used gas of all transactions
@@ -219,4 +182,4 @@ func (tx Tx) Successful() bool {
 	return tx.TxResponse.Code == 0
 }
 
-func (b Block) Raw() *cometbftcoretypes.ResultBlock { return b.rb }
+func (b Block) Raw() *tmcoretypes.ResultBlock { return b.rb }

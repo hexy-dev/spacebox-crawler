@@ -3,10 +3,10 @@ package rpc
 import (
 	"context"
 
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmcoretypes "github.com/tendermint/tendermint/rpc/coretypes"
 )
 
-func (c *Client) GetBlockResults(ctx context.Context, height int64) (*coretypes.ResultBlockResults, error) {
+func (c *Client) GetBlockResults(ctx context.Context, height int64) (*tmcoretypes.ResultBlockResults, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.cfg.Timeout)
 	defer cancel()
 

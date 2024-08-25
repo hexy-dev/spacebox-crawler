@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cosmos/gogoproto/jsonpb"
+	"github.com/gogo/protobuf/jsonpb"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"
 )

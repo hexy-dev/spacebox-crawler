@@ -4,16 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	cometbftHttp "github.com/cometbft/cometbft/rpc/client/http"
-	jsonrpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	tmHttp "github.com/tendermint/tendermint/rpc/client/http"
+	jsonrpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
 
 type Client struct {
 	*jsonrpcclient.WSClient
-	*cometbftHttp.WSEvents
 
-	RPCClient *cometbftHttp.HTTP
+	RPCClient *tmHttp.HTTP
 
 	cfg Config
 }
@@ -22,7 +21,7 @@ func New(cfg Config) *Client {
 	return &Client{cfg: cfg}
 }
 
-func (c *Client) Start(_ context.Context) error {
+func (c *Client) Start(ctx context.Context) error {
 	httpClient, err := jsonrpcclient.DefaultHTTPClient(c.cfg.Host)
 	if err != nil {
 		return err
@@ -37,12 +36,12 @@ func (c *Client) Start(_ context.Context) error {
 		)
 	}
 
-	c.RPCClient, err = cometbftHttp.NewWithClient(c.cfg.Host, "/websocket", httpClient)
+	c.RPCClient, err = tmHttp.NewWithClient(c.cfg.Host, httpClient)
 	if err != nil {
 		return err
 	}
 
-	if err = c.RPCClient.Start(); err != nil {
+	if err = c.RPCClient.Start(ctx); err != nil {
 		return err
 	}
 

@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
-	cometbftcoreypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
-	codec "github.com/cosmos/cosmos-sdk/codec/types"
 	jsoniter "github.com/json-iterator/go"
+	tmcoreypes "github.com/tendermint/tendermint/rpc/coretypes"
+	tmtypes "github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"
@@ -19,12 +17,7 @@ import (
 
 const (
 	keyHeight = "height"
-	keyTxHash = "tx_hash"
 	keyModule = "module"
-)
-
-var (
-	errRecurringHandling = errors.New("cant handle recurring messages")
 )
 
 func (w *Worker) process(ctx context.Context, workerIndex int, recoverMode bool) {
@@ -106,11 +99,7 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 
 	g, ctx2 := errgroup.WithContext(ctx)
 
-	var (
-		block                            *cometbftcoreypes.ResultBlock
-		vals                             *cometbftcoreypes.ResultValidators
-		beginBlockEvents, endBlockEvents types.BlockerEvents
-	)
+	var block *tmcoreypes.ResultBlock
 
 	g.Go(func() error {
 		var err error
@@ -124,38 +113,6 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 			Int64("block_height", height).
 			Dur("get_block_dur", time.Since(_blockDur)).
 			Msg("get block info")
-		return nil
-	})
-
-	g.Go(func() error {
-		var err error
-		_validatorsDur := time.Now()
-		if vals, err = w.grpcClient.Validators(ctx2, height); err != nil {
-			return fmt.Errorf("failed to get validators: %w", err)
-		}
-		w.log.Debug().
-			Int("worker_number", workerIndex).
-			Int64("block_height", height).
-			Dur("get_validators_dur", time.Since(_validatorsDur)).
-			Msg("Get validators info")
-
-		return nil
-	})
-
-	g.Go(func() error {
-		var err error
-		_blockEventsDur := time.Now()
-		beginBlockEvents, endBlockEvents, err = w.rpcClient.GetBlockEvents(ctx2, height)
-		if err != nil {
-			return fmt.Errorf("failed to get block events: %w", err)
-		}
-
-		w.log.Debug().
-			Int("worker_number", workerIndex).
-			Int64("block_height", height).
-			Dur("get_block_events_dur", time.Since(_blockEventsDur)).
-			Msg("get validators info")
-
 		return nil
 	})
 
@@ -184,11 +141,6 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 	g, ctx2 = errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		return w.withMetrics("validators", func() error {
-			return w.processValidators(ctx2, height, vals)
-		})
-	})
-	g.Go(func() error {
 		return w.withMetrics("block", func() error {
 			return w.processBlock(ctx2, types.NewBlockFromTmBlock(block, txs.TotalGas()))
 		})
@@ -196,21 +148,6 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 	g.Go(func() error {
 		return w.withMetrics("txs", func() error {
 			return w.processTxs(ctx2, txs)
-		})
-	})
-	g.Go(func() error {
-		return w.withMetrics("messages", func() error {
-			return w.processMessages(ctx2, txs)
-		})
-	})
-	g.Go(func() error {
-		return w.withMetrics("beginblocker", func() error {
-			return w.processBeginBlockerEvents(ctx2, beginBlockEvents, height)
-		})
-	})
-	g.Go(func() error {
-		return w.withMetrics("endblocker", func() error {
-			return w.processEndBlockEvents(ctx2, endBlockEvents, height)
 		})
 	})
 
@@ -224,7 +161,7 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 	}
 }
 
-func (w *Worker) processGenesis(ctx context.Context, genesis *cometbfttypes.GenesisDoc) error {
+func (w *Worker) processGenesis(ctx context.Context, genesis *tmtypes.GenesisDoc) error {
 	var appState map[string]json.RawMessage
 	if err := jsoniter.Unmarshal(genesis.AppState, &appState); err != nil {
 		w.log.Err(err).Msg("error unmarshalling genesis doc")
@@ -256,22 +193,6 @@ func (w *Worker) processBlock(ctx context.Context, block *types.Block) error {
 	return nil
 }
 
-func (w *Worker) processValidators(ctx context.Context, height int64, vals *cometbftcoreypes.ResultValidators) error {
-	for _, m := range validatorsHandlers {
-		if err := m.HandleValidators(ctx, vals); err != nil {
-			w.log.Error().
-				Err(err).
-				Int64(keyHeight, height).
-				Str(keyModule, m.Name()).
-				Msg("HandleValidators error")
-
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (w *Worker) processTxs(ctx context.Context, txs []*types.Tx) error {
 	for _, tx := range txs {
 		for _, m := range transactionHandlers {
@@ -284,112 +205,6 @@ func (w *Worker) processTxs(ctx context.Context, txs []*types.Tx) error {
 
 				return err
 			}
-		}
-	}
-
-	return nil
-}
-
-func (w *Worker) processMessages(ctx context.Context, txs []*types.Tx) error {
-	for _, tx := range txs {
-		if !tx.Successful() { // skip message processing for failed transaction
-			continue
-		}
-
-		for i, msg := range tx.Body.Messages {
-			if err := w.processMessage(ctx, msg, tx, i); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (w *Worker) processMessage(ctx context.Context, msg *codec.Any, tx *types.Tx, msgIndex int) error {
-	if msg == nil {
-		w.log.Warn().Int64(keyHeight, tx.Height).Str(keyTxHash, tx.TxHash).Msg("can't process nil message")
-
-		if err := w.storage.InsertErrorMessage(ctx, w.tsM.NewErrorMessage(tx.Height, "message is nil")); err != nil {
-			w.log.Error().
-				Err(err).
-				Int64(keyHeight, tx.Height).
-				Msgf("fail to insert error_message: %v", err)
-
-			return err
-		}
-
-		return nil
-	}
-
-	stdMsg, err := w.unpackMessage(ctx, tx.Height, msg)
-	if err != nil {
-		return err
-	}
-
-	// message is not supported. skip it
-	if stdMsg == nil || reflect.ValueOf(stdMsg).IsNil() {
-		return nil
-	}
-
-	for _, m := range messageHandlers {
-		if err = m.HandleMessage(ctx, msgIndex, stdMsg, tx); err != nil {
-			w.log.Error().
-				Err(err).
-				Int64(keyHeight, tx.Height).
-				Str(keyModule, m.Name()).
-				Msg("HandleMessage error")
-
-			return err
-		}
-	}
-
-	for _, m := range recursiveMessagesHandlers {
-		toProcess, err := m.HandleMessageRecursive(ctx, msgIndex, stdMsg, tx)
-		if err != nil {
-			w.log.Error().
-				Err(err).
-				Int64(keyHeight, tx.Height).
-				Str(keyModule, m.Name()).
-				Msg("HandleRecursiveMessage error")
-
-			return err
-		}
-
-		if len(toProcess) > 0 {
-			for _, toProcessMessage := range toProcess {
-				if err = w.processMessage(ctx, toProcessMessage, tx, msgIndex); err != nil {
-					w.log.Error().
-						Err(err).
-						Int64(keyHeight, tx.Height).
-						Str(keyModule, m.Name()).
-						Msg("HandleRecursiveMessage error")
-
-					return errors.Join(errRecurringHandling, err)
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-func (w *Worker) processBeginBlockerEvents(ctx context.Context, events types.BlockerEvents, height int64) error {
-	for _, m := range beginBlockerHandlers {
-		if err := m.HandleBeginBlocker(ctx, events, height); err != nil {
-			w.log.Error().Err(err).Str(keyModule, m.Name()).Msg("HandleBeginBlocker error")
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (w *Worker) processEndBlockEvents(ctx context.Context, events types.BlockerEvents, height int64) error {
-	for _, m := range endBlockerHandlers {
-		if err := m.HandleEndBlocker(ctx, events, height); err != nil {
-			w.log.Error().Err(err).Str(keyModule, m.Name()).Msg("HandleEndBlocker error")
-			return err
 		}
 	}
 

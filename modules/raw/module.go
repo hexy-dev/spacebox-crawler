@@ -13,8 +13,10 @@ const (
 )
 
 var (
-	_ types.Module       = &Module{}
-	_ types.BlockHandler = &Module{}
+	_ types.Module             = &Module{}
+	_ types.BlockHandler       = &Module{}
+	_ types.TransactionHandler = &Module{}
+	_ types.GenesisHandler     = &Module{}
 )
 
 type Module struct {

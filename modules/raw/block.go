@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	jsoniter "github.com/json-iterator/go"
+	coretypes "github.com/tendermint/tendermint/rpc/coretypes"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"
 )

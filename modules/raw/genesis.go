@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	cometbfttypes "github.com/cometbft/cometbft/types"
 	jsoniter "github.com/json-iterator/go"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-func (m *Module) HandleGenesis(ctx context.Context, doc *cometbfttypes.GenesisDoc, _ map[string]json.RawMessage) error {
+func (m *Module) HandleGenesis(ctx context.Context, doc *tmtypes.GenesisDoc, _ map[string]json.RawMessage) error {
 	rawGenesis := struct {
 		GenesisTime     string          `json:"genesis_time"`
 		ChainID         string          `json:"chain_id"`
