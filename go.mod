@@ -3,9 +3,9 @@ module github.com/bro-n-bro/spacebox-crawler/v2
 go 1.22.4
 
 replace (
-	github.com/CosmWasm/wasmd => github.com/sei-protocol/sei-wasmd v0.2.4-0.20240816184629-eb6d20caf603
+	github.com/CosmWasm/wasmd => github.com/sei-protocol/sei-wasmd v0.2.4
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
-	github.com/cosmos/cosmos-sdk => github.com/sei-protocol/sei-cosmos v0.3.33
+	github.com/cosmos/cosmos-sdk => github.com/sei-protocol/sei-cosmos v0.3.35
 	github.com/cosmos/iavl => github.com/sei-protocol/sei-iavl v0.1.9
 	github.com/cosmos/ibc-go/v3 => github.com/sei-protocol/sei-ibc-go/v3 v3.3.2
 	github.com/ethereum/go-ethereum => github.com/sei-protocol/go-ethereum v1.13.5-sei-22
@@ -20,7 +20,6 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/confluentinc/confluent-kafka-go/v2 v2.3.0
 	github.com/cosmos/cosmos-sdk v0.47.11
-	github.com/cosmos/gogoproto v1.4.10
 	github.com/cosmos/ibc-go/v3 v3.0.0
 	github.com/globocom/mongo-go-prometheus v0.1.1
 	github.com/gogo/protobuf v1.3.3
@@ -33,11 +32,8 @@ require (
 	github.com/sei-protocol/sei-chain v0.0.38
 	github.com/tendermint/tendermint v0.37.0-dev
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.23.0
-	golang.org/x/sync v0.7.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de
-	google.golang.org/grpc v1.63.2
-	gopkg.in/yaml.v3 v3.0.1
+	golang.org/x/sync v0.8.0
+	google.golang.org/grpc v1.64.1
 )
 
 require (
@@ -94,7 +90,6 @@ require (
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/orderedcode v0.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
@@ -176,16 +171,19 @@ require (
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/term v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/term v0.21.0 // indirect
+	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	pgregory.net/rapid v1.1.0 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )

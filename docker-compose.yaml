@@ -42,8 +42,8 @@ services:
     hostname: mongo
     container_name: spacebox-mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: space_box_user
-      MONGO_INITDB_ROOT_PASSWORD: space_box_password
+      MONGO_INITDB_ROOT_USERNAME: spacebox_user
+      MONGO_INITDB_ROOT_PASSWORD: spacebox_password
       MONGO_INITDB_DATABASE: spacebox
     ports:
       - "27018:27017"
