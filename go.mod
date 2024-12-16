@@ -33,7 +33,6 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/rs/zerolog v1.32.0
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.23.0
 	golang.org/x/sync v0.7.0
 	google.golang.org/grpc v1.65.0
 )
@@ -221,6 +220,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
