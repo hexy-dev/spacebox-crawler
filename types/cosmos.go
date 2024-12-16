@@ -1,20 +1,18 @@
 package types
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"time"
 
+	"github.com/cometbft/cometbft/crypto"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
-	"github.com/tendermint/tendermint/crypto"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
-	"golang.org/x/crypto/ripemd160" // nolint: staticcheck
 )
 
 var (
@@ -172,17 +170,10 @@ func ConvertValidatorPubKeyToBech32String(pubKey crypto.PubKey) (string, error) 
 	return bech32.ConvertAndEncode(bech32Prefix, pubKey.Bytes())
 }
 
-func BytesToAddress(key []byte) cryptotypes.Address {
-	sha := sha256.Sum256(key)
-	hasherRIPEMD160 := ripemd160.New()
-	hasherRIPEMD160.Write(sha[:])
-	return hasherRIPEMD160.Sum(nil)
-}
-
 // TotalGas calculates and returns total used gas of all transactions
 func (txs Txs) TotalGas() (totalGas uint64) {
 	for _, tx := range txs {
-		totalGas += uint64(tx.GasUsed)
+		totalGas += uint64(tx.GasUsed) //nolint:gosec
 	}
 
 	return totalGas

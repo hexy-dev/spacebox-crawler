@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 )
 
 func (c *Client) GetTxResults(ctx context.Context, height int64) ([]*abci.ResponseDeliverTx, error) {

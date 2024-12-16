@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmclient "github.com/CosmWasm/wasmd/x/wasm/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdc "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
@@ -18,11 +18,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/capability"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/gov"
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	"github.com/cosmos/cosmos-sdk/x/mint"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
@@ -30,19 +30,21 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	ibcfee "github.com/cosmos/ibc-go/v4/modules/apps/29-fee"
-	"github.com/cosmos/ibc-go/v4/modules/apps/transfer"
-	ibc "github.com/cosmos/ibc-go/v4/modules/core"
-	ibcclientclient "github.com/cosmos/ibc-go/v4/modules/core/02-client/client"
-	ibclightclienttypes "github.com/cosmos/ibc-go/v4/modules/light-clients/07-tendermint/types"
-	"github.com/cybercongress/go-cyber/v3/x/bandwidth"
-	"github.com/cybercongress/go-cyber/v3/x/cyberbank"
-	"github.com/cybercongress/go-cyber/v3/x/dmn"
-	"github.com/cybercongress/go-cyber/v3/x/graph"
-	grid "github.com/cybercongress/go-cyber/v3/x/grid"
-	"github.com/cybercongress/go-cyber/v3/x/rank"
-	"github.com/cybercongress/go-cyber/v3/x/resources"
-	"github.com/gravity-devs/liquidity/x/liquidity"
+	ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
+	ibclightclienttypes "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+	"github.com/cybercongress/go-cyber/v5/x/bandwidth"
+	"github.com/cybercongress/go-cyber/v5/x/clock"
+	"github.com/cybercongress/go-cyber/v5/x/cyberbank"
+	"github.com/cybercongress/go-cyber/v5/x/dmn"
+	"github.com/cybercongress/go-cyber/v5/x/graph"
+	grid "github.com/cybercongress/go-cyber/v5/x/grid"
+	"github.com/cybercongress/go-cyber/v5/x/liquidity"
+	"github.com/cybercongress/go-cyber/v5/x/rank"
+	"github.com/cybercongress/go-cyber/v5/x/resources"
+	"github.com/cybercongress/go-cyber/v5/x/tokenfactory"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -214,14 +216,13 @@ func MakeEncodingConfig() codec.Codec {
 			mint.AppModuleBasic{},
 			distr.AppModuleBasic{},
 			gov.NewAppModuleBasic(
-				append(
-					wasmclient.ProposalHandlers, //nolint:staticcheck
+				[]govclient.ProposalHandler{
 					paramsclient.ProposalHandler,
-					distrclient.ProposalHandler,
-					upgradeclient.ProposalHandler,
-					upgradeclient.CancelProposalHandler,
+					upgradeclient.LegacyProposalHandler,
+					upgradeclient.LegacyCancelProposalHandler,
 					ibcclientclient.UpdateClientProposalHandler,
-					ibcclientclient.UpgradeProposalHandler)...),
+					ibcclientclient.UpgradeProposalHandler,
+				}),
 			params.AppModuleBasic{},
 			crisis.AppModuleBasic{},
 			slashing.AppModuleBasic{},
@@ -242,9 +243,12 @@ func MakeEncodingConfig() codec.Codec {
 			grid.AppModuleBasic{},
 			dmn.AppModuleBasic{},
 			resources.AppModuleBasic{},
+			clock.AppModuleBasic{},
+			tokenfactory.AppModuleBasic{},
 		)
 	)
 
+	txtypes.RegisterInterfaces(registry)
 	ibclightclienttypes.RegisterInterfaces(registry)
 
 	//

@@ -1,6 +1,6 @@
 package types
 
-import abci "github.com/tendermint/tendermint/abci/types"
+import abci "github.com/cometbft/cometbft/abci/types"
 
 type BlockerEvents map[string][]abci.Event
 

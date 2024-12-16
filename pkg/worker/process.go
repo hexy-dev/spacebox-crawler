@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"time"
 
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	codec "github.com/cosmos/cosmos-sdk/codec/types"
 	jsoniter "github.com/json-iterator/go"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"

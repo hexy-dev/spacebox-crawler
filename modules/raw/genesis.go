@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cometbft/cometbft/types"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/tendermint/tendermint/types"
 )
 
 func (m *Module) HandleGenesis(ctx context.Context, doc *types.GenesisDoc, _ map[string]json.RawMessage) error {

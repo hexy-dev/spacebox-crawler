@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"time"
 
+	"github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
-	"github.com/tendermint/tendermint/types"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/adapter/storage/model"
 )

@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 )
 
 func (c *Client) GetBlockResults(ctx context.Context, height int64) (*coretypes.ResultBlockResults, error) {

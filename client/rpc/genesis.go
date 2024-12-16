@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 
-	"github.com/tendermint/tendermint/libs/json"
-	"github.com/tendermint/tendermint/types"
+	"github.com/cometbft/cometbft/libs/json"
+	"github.com/cometbft/cometbft/types"
 	"golang.org/x/sync/errgroup"
 )
 
+//nolint:gosec
 func (c *Client) Genesis(ctx context.Context) (*types.GenesisDoc, error) {
 	chunk, err := c.RPCClient.GenesisChunked(ctx, 0)
 	if err != nil {

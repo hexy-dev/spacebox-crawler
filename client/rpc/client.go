@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	httpCli "github.com/cometbft/cometbft/rpc/client/http"
+	jsonrpcclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	httpCli "github.com/tendermint/tendermint/rpc/client/http"
-	jsonrpcclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
 
 type Client struct {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	jsoniter "github.com/json-iterator/go"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"
 )
@@ -23,7 +23,7 @@ func (m *Module) HandleBlock(ctx context.Context, block *types.Block) error {
 		TotalGas:        block.TotalGas,
 		Hash:            block.Hash,
 		ProposerAddress: block.ProposerAddress,
-		NumTxs:          uint16(block.TxNum),
+		NumTxs:          uint16(block.TxNum), //nolint:gosec
 	}
 
 	var err error

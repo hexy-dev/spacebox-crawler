@@ -3,11 +3,11 @@ package grpc
 import (
 	"context"
 
+	"github.com/cometbft/cometbft/crypto/ed25519"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	"github.com/tendermint/tendermint/types"
 )
 
 const (
@@ -42,7 +42,7 @@ func (c *Client) Validators(ctx context.Context, height int64) (*coretypes.Resul
 			vals.Validators = append(vals.Validators, convertValidator(val))
 		}
 
-		vals.Total = int(respPb.Pagination.Total)
+		vals.Total = int(respPb.Pagination.Total) //nolint:gosec
 
 		if len(respPb.Validators) < defaultLimit {
 			break

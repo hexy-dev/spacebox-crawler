@@ -25,7 +25,7 @@ race: dep ## Run data race detector
 
 install-linter: ## Install golangci-lint
 	@mkdir -p bin
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b bin v1.59.0
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b bin v1.62.2
 	@bin/golangci-lint --version
 
 lint: install-linter ## Lint the files

@@ -3,9 +3,9 @@ package grpc
 import (
 	"context"
 
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (c *Client) Block(ctx context.Context, height int64) (*coretypes.ResultBlock, error) {
