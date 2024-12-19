@@ -30,6 +30,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
+	"github.com/cosmos/gogoproto/proto"
 	ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
 	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
@@ -42,6 +43,7 @@ import (
 	"github.com/cybercongress/go-cyber/v5/x/graph"
 	grid "github.com/cybercongress/go-cyber/v5/x/grid"
 	"github.com/cybercongress/go-cyber/v5/x/liquidity"
+	liquiditytypes "github.com/cybercongress/go-cyber/v5/x/liquidity/types"
 	"github.com/cybercongress/go-cyber/v5/x/rank"
 	"github.com/cybercongress/go-cyber/v5/x/resources"
 	"github.com/cybercongress/go-cyber/v5/x/tokenfactory"
@@ -255,6 +257,8 @@ func MakeEncodingConfig() codec.Codec {
 	basicManager.RegisterInterfaces(registry)
 	std.RegisterInterfaces(registry)
 
+	registerTendermintLiquidity()
+
 	return codec.NewProtoCodec(registry)
 }
 
@@ -297,4 +301,16 @@ func checkLastBlockDiff(maxDiff time.Duration, storage interface {
 
 		return time.Since(lastBlock.Created) <= maxDiff
 	}
+}
+
+//nolint:lll
+func registerTendermintLiquidity() {
+	proto.RegisterType((*liquiditytypes.MsgCreatePool)(nil), "tendermint.liquidity.v1beta1.MsgCreatePool")
+	proto.RegisterType((*liquiditytypes.MsgCreatePoolResponse)(nil), "tendermint.liquidity.v1beta1.MsgCreatePoolResponse")
+	proto.RegisterType((*liquiditytypes.MsgDepositWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgDepositWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgDepositWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgDepositWithinBatchResponse")
+	proto.RegisterType((*liquiditytypes.MsgWithdrawWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgWithdrawWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgWithdrawWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgWithdrawWithinBatchResponse")
+	proto.RegisterType((*liquiditytypes.MsgSwapWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgSwapWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgSwapWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgSwapWithinBatchResponse")
 }
