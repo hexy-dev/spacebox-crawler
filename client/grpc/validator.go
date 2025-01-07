@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
-	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/types/query"
 )
@@ -14,8 +14,8 @@ const (
 	defaultLimit = 100
 )
 
-func (c *Client) Validators(ctx context.Context, height int64) (*cometbftcoretypes.ResultValidators, error) {
-	vals := &cometbftcoretypes.ResultValidators{
+func (c *Client) Validators(ctx context.Context, height int64) (*coretypes.ResultValidators, error) {
+	vals := &coretypes.ResultValidators{
 		BlockHeight: height,
 	}
 
@@ -35,14 +35,14 @@ func (c *Client) Validators(ctx context.Context, height int64) (*cometbftcoretyp
 		}
 
 		if offset == 0 { // first iteration
-			vals.Validators = make([]*cometbfttypes.Validator, 0, vals.Total)
+			vals.Validators = make([]*types.Validator, 0, vals.Total)
 		}
 
 		for _, val := range respPb.Validators {
 			vals.Validators = append(vals.Validators, convertValidator(val))
 		}
 
-		vals.Total = int(respPb.Pagination.Total)
+		vals.Total = int(respPb.Pagination.Total) //nolint:gosec
 
 		if len(respPb.Validators) < defaultLimit {
 			break
@@ -56,11 +56,11 @@ func (c *Client) Validators(ctx context.Context, height int64) (*cometbftcoretyp
 	return vals, nil
 }
 
-func convertValidator(c *tmservice.Validator) *cometbfttypes.Validator {
+func convertValidator(c *tmservice.Validator) *types.Validator {
 	pk := ed25519.PubKey(c.PubKey.Value)
 
-	return &cometbfttypes.Validator{
-		Address:          cometbfttypes.Address(c.Address),
+	return &types.Validator{
+		Address:          types.Address(c.Address),
 		PubKey:           &pk,
 		VotingPower:      c.VotingPower,
 		ProposerPriority: c.ProposerPriority,

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	cometbftcoreypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cometbft/cometbft/types"
 )
 
 func (w *Worker) enqueueHeight(ctx context.Context, wg *sync.WaitGroup, startHeight, stopHeight int64) {
@@ -33,7 +33,7 @@ func (w *Worker) enqueueHeight(ctx context.Context, wg *sync.WaitGroup, startHei
 	}
 }
 
-func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan cometbftcoreypes.ResultEvent) {
+func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan coretypes.ResultEvent) {
 	ctx, w.stopWsListener = context.WithCancel(ctx)
 	defer w.stopWsListener()
 	w.log.Info().Msg("listening for new block events")
@@ -44,7 +44,7 @@ func (w *Worker) enqueueNewBlocks(ctx context.Context, eventCh <-chan cometbftco
 			w.log.Info().Msg("stop new block listener")
 			return
 		case e := <-eventCh:
-			newBlock, ok := e.Data.(cometbfttypes.EventDataNewBlock)
+			newBlock, ok := e.Data.(types.EventDataNewBlock)
 			if !ok {
 				w.log.Warn().Msg("failed to cast ws event to EventDataNewBlock type")
 				continue

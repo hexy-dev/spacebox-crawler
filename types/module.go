@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -42,13 +42,13 @@ type (
 	ValidatorsHandler interface {
 		Module
 		// HandleValidators handles of all validators in blockchain.
-		HandleValidators(ctx context.Context, vals *cometbftcoretypes.ResultValidators) error
+		HandleValidators(ctx context.Context, vals *coretypes.ResultValidators) error
 	}
 
 	GenesisHandler interface {
 		Module
 		// HandleGenesis handles a genesis state.
-		HandleGenesis(ctx context.Context, doc *cometbfttypes.GenesisDoc, appState map[string]json.RawMessage) error
+		HandleGenesis(ctx context.Context, doc *tmtypes.GenesisDoc, appState map[string]json.RawMessage) error
 	}
 
 	BeginBlockerHandler interface {

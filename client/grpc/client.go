@@ -44,6 +44,7 @@ func (c *Client) Start(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second) // dial timeout
 	defer cancel()
 
+	// nolint:staticcheck
 	options := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithChainUnaryInterceptor(timeout.UnaryClientInterceptor(c.cfg.Timeout)), // request timeout
@@ -71,6 +72,7 @@ func (c *Client) Start(ctx context.Context) error {
 	}
 
 	// Create a connection to the gRPC server.
+	// nolint:staticcheck
 	grpcConn, err := grpc.DialContext(
 		ctx,
 		c.cfg.Host, // Or your gRPC server address.

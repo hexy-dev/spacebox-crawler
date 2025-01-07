@@ -23,7 +23,7 @@ func (m *Module) HandleBlock(ctx context.Context, block *types.Block) error {
 		TotalGas:        block.TotalGas,
 		Hash:            block.Hash,
 		ProposerAddress: block.ProposerAddress,
-		NumTxs:          uint16(block.TxNum),
+		NumTxs:          uint16(block.TxNum), //nolint:gosec
 	}
 
 	var err error

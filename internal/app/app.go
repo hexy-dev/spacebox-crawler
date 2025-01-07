@@ -4,43 +4,49 @@ import (
 	"context"
 	"time"
 
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	"github.com/CosmWasm/wasmd/x/wasm"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdc "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/capability"
-	"github.com/cosmos/cosmos-sdk/x/consensus"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	"github.com/cosmos/cosmos-sdk/x/mint"
-	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	gaia "github.com/cosmos/gaia/v17/x/metaprotocols"
-	ibcaccounts "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	"github.com/cosmos/gogoproto/proto"
 	ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibccore "github.com/cosmos/ibc-go/v7/modules/core"
-	ibclightclient "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
-	interchainprovider "github.com/cosmos/interchain-security/v4/x/ccv/provider"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
+	ibclightclienttypes "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+	"github.com/cybercongress/go-cyber/v5/x/bandwidth"
+	"github.com/cybercongress/go-cyber/v5/x/clock"
+	"github.com/cybercongress/go-cyber/v5/x/cyberbank"
+	"github.com/cybercongress/go-cyber/v5/x/dmn"
+	"github.com/cybercongress/go-cyber/v5/x/graph"
+	grid "github.com/cybercongress/go-cyber/v5/x/grid"
+	"github.com/cybercongress/go-cyber/v5/x/liquidity"
+	liquiditytypes "github.com/cybercongress/go-cyber/v5/x/liquidity/types"
+	"github.com/cybercongress/go-cyber/v5/x/rank"
+	"github.com/cybercongress/go-cyber/v5/x/resources"
+	"github.com/cybercongress/go-cyber/v5/x/tokenfactory"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -58,7 +64,6 @@ import (
 	healthchecker "github.com/bro-n-bro/spacebox-crawler/v2/pkg/health_checker"
 	ts "github.com/bro-n-bro/spacebox-crawler/v2/pkg/mapper/to_storage"
 	"github.com/bro-n-bro/spacebox-crawler/v2/pkg/worker"
-	liquiditytypes "github.com/bro-n-bro/spacebox-crawler/v2/types/liquidity"
 )
 
 const (
@@ -206,47 +211,53 @@ func MakeEncodingConfig() codec.Codec {
 		registry     = cdc.NewInterfaceRegistry()
 		basicManager = module.NewBasicManager(
 			auth.AppModuleBasic{},
-			genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			genutil.AppModuleBasic{},
 			bank.AppModuleBasic{},
 			capability.AppModuleBasic{},
 			staking.AppModuleBasic{},
 			mint.AppModuleBasic{},
-			distribution.AppModuleBasic{},
-			params.AppModuleBasic{},
-			crisis.AppModuleBasic{},
-			slashing.AppModuleBasic{},
-			feegrantmodule.AppModuleBasic{},
-			upgrade.AppModuleBasic{},
-			evidence.AppModuleBasic{},
-			authzmodule.AppModuleBasic{},
-			groupmodule.AppModuleBasic{},
-			vesting.AppModuleBasic{},
-			nftmodule.AppModuleBasic{},
-			consensus.AppModuleBasic{},
-			ibccore.AppModuleBasic{},
-			ibcfee.AppModuleBasic{},
-			ibcaccounts.AppModuleBasic{},
-			ibclightclient.AppModuleBasic{},
-			interchainprovider.AppModuleBasic{},
-			gaia.AppModuleBasic{},
+			distr.AppModuleBasic{},
 			gov.NewAppModuleBasic(
 				[]govclient.ProposalHandler{
 					paramsclient.ProposalHandler,
 					upgradeclient.LegacyProposalHandler,
 					upgradeclient.LegacyCancelProposalHandler,
-				},
-			),
+					ibcclientclient.UpdateClientProposalHandler,
+					ibcclientclient.UpgradeProposalHandler,
+				}),
+			params.AppModuleBasic{},
+			crisis.AppModuleBasic{},
+			slashing.AppModuleBasic{},
+			feegrantmodule.AppModuleBasic{},
+			authzmodule.AppModuleBasic{},
+			ibc.AppModuleBasic{},
+			ibcfee.AppModuleBasic{},
+			upgrade.AppModuleBasic{},
+			evidence.AppModuleBasic{},
+			transfer.AppModuleBasic{},
+			vesting.AppModuleBasic{},
+			liquidity.AppModuleBasic{},
+			wasm.AppModuleBasic{},
+			bandwidth.AppModuleBasic{},
+			cyberbank.AppModuleBasic{},
+			graph.AppModuleBasic{},
+			rank.AppModuleBasic{},
+			grid.AppModuleBasic{},
+			dmn.AppModuleBasic{},
+			resources.AppModuleBasic{},
+			clock.AppModuleBasic{},
+			tokenfactory.AppModuleBasic{},
 		)
 	)
 
-	wasmtypes.RegisterInterfaces(registry)
+	txtypes.RegisterInterfaces(registry)
+	ibclightclienttypes.RegisterInterfaces(registry)
 
 	//
 	basicManager.RegisterInterfaces(registry)
 	std.RegisterInterfaces(registry)
-	ibctransfertypes.RegisterInterfaces(registry)
-	cryptocodec.RegisterInterfaces(registry)
-	liquiditytypes.RegisterInterfaces(registry)
+
+	registerTendermintLiquidity()
 
 	return codec.NewProtoCodec(registry)
 }
@@ -290,4 +301,16 @@ func checkLastBlockDiff(maxDiff time.Duration, storage interface {
 
 		return time.Since(lastBlock.Created) <= maxDiff
 	}
+}
+
+//nolint:lll
+func registerTendermintLiquidity() {
+	proto.RegisterType((*liquiditytypes.MsgCreatePool)(nil), "tendermint.liquidity.v1beta1.MsgCreatePool")
+	proto.RegisterType((*liquiditytypes.MsgCreatePoolResponse)(nil), "tendermint.liquidity.v1beta1.MsgCreatePoolResponse")
+	proto.RegisterType((*liquiditytypes.MsgDepositWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgDepositWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgDepositWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgDepositWithinBatchResponse")
+	proto.RegisterType((*liquiditytypes.MsgWithdrawWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgWithdrawWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgWithdrawWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgWithdrawWithinBatchResponse")
+	proto.RegisterType((*liquiditytypes.MsgSwapWithinBatch)(nil), "tendermint.liquidity.v1beta1.MsgSwapWithinBatch")
+	proto.RegisterType((*liquiditytypes.MsgSwapWithinBatchResponse)(nil), "tendermint.liquidity.v1beta1.MsgSwapWithinBatchResponse")
 }

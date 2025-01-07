@@ -3,8 +3,8 @@ package rep
 import (
 	"context"
 
-	cometbftcoretypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 
 	"github.com/bro-n-bro/spacebox-crawler/v2/types"
@@ -12,15 +12,15 @@ import (
 
 type (
 	GrpcClient interface {
-		Block(ctx context.Context, height int64) (*cometbftcoretypes.ResultBlock, error)
-		Validators(ctx context.Context, height int64) (*cometbftcoretypes.ResultValidators, error)
+		Block(ctx context.Context, height int64) (*coretypes.ResultBlock, error)
+		Validators(ctx context.Context, height int64) (*coretypes.ResultValidators, error)
 
-		Txs(ctx context.Context, height int64, txs cometbfttypes.Txs) ([]*tx.GetTxResponse, error)
+		Txs(ctx context.Context, height int64, txs tmtypes.Txs) ([]*tx.GetTxResponse, error)
 	}
 
 	RPCClient interface {
-		SubscribeNewBlocks(ctx context.Context) (<-chan cometbftcoretypes.ResultEvent, error)
-		Genesis(ctx context.Context) (*cometbfttypes.GenesisDoc, error)
+		SubscribeNewBlocks(ctx context.Context) (<-chan coretypes.ResultEvent, error)
+		Genesis(ctx context.Context) (*tmtypes.GenesisDoc, error)
 		GetLastBlockHeight(ctx context.Context) (int64, error)
 		GetBlockEvents(ctx context.Context, height int64) (begin, end types.BlockerEvents, err error)
 	}

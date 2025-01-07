@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"time"
 
-	cometbftcoreypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	codec "github.com/cosmos/cosmos-sdk/codec/types"
 	jsoniter "github.com/json-iterator/go"
 	"golang.org/x/sync/errgroup"
@@ -107,8 +107,8 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 	g, ctx2 := errgroup.WithContext(ctx)
 
 	var (
-		block                            *cometbftcoreypes.ResultBlock
-		vals                             *cometbftcoreypes.ResultValidators
+		block                            *coretypes.ResultBlock
+		vals                             *coretypes.ResultValidators
 		beginBlockEvents, endBlockEvents types.BlockerEvents
 	)
 
@@ -224,7 +224,7 @@ func (w *Worker) processHeight(ctx context.Context, workerIndex int, height int6
 	}
 }
 
-func (w *Worker) processGenesis(ctx context.Context, genesis *cometbfttypes.GenesisDoc) error {
+func (w *Worker) processGenesis(ctx context.Context, genesis *tmtypes.GenesisDoc) error {
 	var appState map[string]json.RawMessage
 	if err := jsoniter.Unmarshal(genesis.AppState, &appState); err != nil {
 		w.log.Err(err).Msg("error unmarshalling genesis doc")
@@ -256,7 +256,7 @@ func (w *Worker) processBlock(ctx context.Context, block *types.Block) error {
 	return nil
 }
 
-func (w *Worker) processValidators(ctx context.Context, height int64, vals *cometbftcoreypes.ResultValidators) error {
+func (w *Worker) processValidators(ctx context.Context, height int64, vals *coretypes.ResultValidators) error {
 	for _, m := range validatorsHandlers {
 		if err := m.HandleValidators(ctx, vals); err != nil {
 			w.log.Error().
